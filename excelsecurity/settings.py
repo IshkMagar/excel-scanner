@@ -26,7 +26,7 @@ SECRET_KEY = 'django-insecure-$=k2m8v2l4k-jra(qdk#nu@rk6s=u9@k%!@^shrh+#rkbq=3(5
 # SECURITY WARNING: don't run with debug turned on in production!
 DEBUG = False
 
-ALLOWED_HOSTS = ['excel-detection.herokuapp.com', '*']
+ALLOWED_HOSTS = ['*']
 
 
 # Application definition
