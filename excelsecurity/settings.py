@@ -24,9 +24,9 @@ BASE_DIR = Path(__file__).resolve().parent.parent
 SECRET_KEY = 'django-insecure-$=k2m8v2l4k-jra(qdk#nu@rk6s=u9@k%!@^shrh+#rkbq=3(5'
 
 # SECURITY WARNING: don't run with debug turned on in production!
-DEBUG = True
+DEBUG = False
 
-ALLOWED_HOSTS = ['*']
+ALLOWED_HOSTS = ['excel-detection.herokuapp.com', '*']
 
 
 # Application definition
