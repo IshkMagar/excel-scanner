@@ -21,7 +21,9 @@ from excel import views
 urlpatterns = [
     path('admin/', admin.site.urls),
     path('registration/login/', LoginView.as_view(), name='login'),
-    path('registration/register/', views.register, name='register'),
+    #path('registration/signup/', views.signup, name='signup'),
     path('', views.login_request, name='home'),
+    path('signup/', views.signup, name='signup'),
+    path('activate/(?P<uidb64>[0-9A-Za-z_\-]+)/(?P<token>[0-9A-Za-z]{1,13}-[0-9A-Za-z]{1,20})/$', views.activate, name='activate'),
     path('logout', views.logout_request, name='logout'),
 ]
