@@ -64,8 +64,8 @@
         {% csrf_token %}
         {{form}}
         <p><strong>I am a...</strong></p>
-        <input type="radio" id="current" name="group" value="current" required>
-        <label for="current">New user</label><br>
+        <input type="radio" id="administrator" name="group" value="administrator" required>
+        <label for="administrator">New user</label><br>
         <button type="submit" class="btn btn-success">Register</button>
     </form>
 {% endblock %}

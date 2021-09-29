@@ -1,0 +1,21 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <title>Access Denied</title>
+<style>
+    h1 {
+        margin: auto;
+        width: 50%;
+        padding: 5%;
+        text-align: center;
+    }
+    h3 {
+        margin: auto;
+        text-align: center;
+    }
+</style>
+</head>
+
+<h1>You are not authorized to view this page.</h1>
+<h3>Please <a href="{% url 'login' %}">login</a>
+    with sufficient rights to view or <a href="{% url 'home' %}">go back</a>.</h3>

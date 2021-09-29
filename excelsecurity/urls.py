@@ -14,16 +14,19 @@ Including another URLconf
     2. Add a URL to urlpatterns:  path('blog/', include('blog.urls'))
 """
 from django.contrib import admin
-from django.urls import path
+from django.urls import path, include
 from django.contrib.auth.views import LoginView
+from django.conf import settings
+from django.conf.urls.static import static
+from django.contrib.auth.decorators import login_required
 from excel import views
 
 urlpatterns = [
     path('admin/', admin.site.urls),
     path('registration/login/', LoginView.as_view(), name='login'),
-    #path('registration/signup/', views.signup, name='signup'),
-    path('', views.login_request, name='home'),
-    path('signup/', views.signup, name='signup'),
-    path('activate/(?P<uidb64>[0-9A-Za-z_\-]+)/(?P<token>[0-9A-Za-z]{1,13}-[0-9A-Za-z]{1,20})/$', views.activate, name='activate'),
+    path('registration/register/', views.register, name='register'),
+    path('', views.home, name='home'),
+    path('extract', views.extract, name='extract'),
+    path('upload', views.upload, name='upload'),
     path('logout', views.logout_request, name='logout'),
-]
+]  + static(settings.MEDIA_URL, document_root=settings.MEDIA_ROOT)

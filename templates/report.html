@@ -1,0 +1,59 @@
+{% load static %}
+<!DOCTYPE html>
+<html>
+    <head>
+        <title>Report</title>
+        <meta name="viewport" content="width=device-width, initial-scale=1">
+        <link rel="stylesheet" href="https://www.w3schools.com/w3css/4/w3.css">
+        <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/4.7.0/css/font-awesome.min.css">
+        <script type="text/javascript" charset="utf8" src="https://cdn.datatables.net/1.10.22/js/jquery.dataTables.min.js"></script>
+        <style>
+          .center{
+            margin: auto;
+            width: 60%;
+            border: 3px solid #737373;
+            padding: 10px;
+          }
+        </style>
+      </head>
+<body>
+  <h1 style="text-align: center"> Data report </h1>
+  <div class="center">
+    <h1> Missing Data Report </h1>
+
+    {% for info in data %}  
+
+      {{info}}
+      <br>
+
+    {% endfor %} 
+
+ </div>
+ <div class="center">
+  <h1> Hidden data</h1>
+  {% for info in hidden %}  
+
+     {{info}}
+    <br>
+
+  {% endfor %} 
+</div>
+  <div class="center">
+  <h1> .exe, excel formula and, url</h1>
+  {% for info in result %}  
+
+    {{info}}
+  <br>
+  {% endfor %} 
+</div>
+  <div class="center">
+    <h1> Macro </h1>
+    {% for info in macro %}  
+  
+      {{info}}
+    <br>
+ 
+    {% endfor %} 
+  </div>
+</body>
+</html>
