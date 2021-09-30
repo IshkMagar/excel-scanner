@@ -20,6 +20,9 @@ import urllib, base64
 import io
 import pandas as pd
 
+
+filename = ""
+
 @login_required(login_url='/registration/login/')
 def login_request(request):
     if request.method == 'POST':
@@ -94,11 +97,11 @@ def upload(request):
                 for column_value in row:
                     null_data_check = column_value.value
 
-                    if re.findall('http[s]?://(?:[a-zA-Z]|[0-9]|[$-_@.&+]|[!*\(\),]|(?:%[0-9a-fA-F][0-9a-fA-F]))+', str(column_value)):
+                    if re.findall('http[s]?://(?:[a-zA-Z]|[0-9]|[$-_@.&+]|[!*\(\),]|(?:%[0-9a-fA-F][0-9a-fA-F]))+', str(null_data_check)):
                         message = 'found a url link in  row ', count
                         result.append(message)
 
-                    elif re.findall(r'\b\S*\.exe\b', str(column_value)):
+                    elif re.findall(r'\b\S*\.exe\b', str(null_data_check)):
                         message = 'found .exe file in  row ', count
                         result.append(message)
 
@@ -120,22 +123,12 @@ def upload(request):
             missing_data = df.isnull().sum()
             incomplete_data = str(missing_data).split('\n')
 
-            #vba_parser = VBA_Parser(file.name)
-            #vba_modules = file.extract_all_macros(file)
-
             
             filedata = open(file.name, 'rb').read()
             vbaparser = VBA_Parser(file.name, data=filedata)
 
             if vbaparser.detect_vba_macros():
                 macro.append("Caution, macros has been found in your excel file.")
-
-            #macro = subprocess.run(['olevba', file.name], stdout=True)
-            #result.append(macro)
-            #p = Path(__file__).with_name('logs.cvs')
-            
-            #with p.open('r') as f:
-                #print(f.read())
 
             if not macro:
                 macro.append("No macro found")
@@ -150,13 +143,15 @@ def extract(request):
     hidden_data = []
     incomplete_data = []
     extract_macro = []
+    number = []
+    input_wrong = ["check out your input data and follow the how to input section"]
+    
     if request.method == 'POST':
         if request.FILES.get('document'):
             file = request.FILES['document']
-
-            EXCEL_FILE_EXTENSIONS = ('xlsb', 'xls', 'xlsm', 'xla', 'xlt', 'xlam',)
-            KEEP_NAME = False  # Set this to True if you would like to keep "Attribute VB_Name"
+            data = request.POST.get('data')
             
+            print(request.POST.get('data'))
             workbook = load_workbook(filename=file, data_only=True)
             xls = workbook[workbook.sheetnames[0]] 
 
@@ -164,49 +159,86 @@ def extract(request):
 
             count = 0
             
-            # check .exe, url, missing data,  
-            for row in xls.iter_rows(min_row=1, max_col=xls.max_column, max_row=xls.max_row):
-                count = count + 1
-                for column_value in row:
-                    null_data_check = column_value.value
-
-                    if re.findall('http[s]?://(?:[a-zA-Z]|[0-9]|[$-_@.&+]|[!*\(\),]|(?:%[0-9a-fA-F][0-9a-fA-F]))+', str(column_value)):
-                        result.append(str(column_value))
-
-                    elif re.findall(r'\b\S*\.exe\b', str(column_value)):
-                        result.append(str(column_value))
-
             
-            # check hidden rows
-            for rowLetter,rowDimension in xls.row_dimensions.items():
-                if rowDimension.hidden == True:
-                    hidden_data.append(rowDimension)
 
-            if not hidden_data:
-                hidden_data.append('Hidden data not found')
+            if data == 'hidden':
+                # check hidden rows
+                for rowLetter,rowDimension in xls.row_dimensions.items():
+                    if rowDimension.hidden == True:
+                        hidden_data.append(rowDimension)
 
-            if not result:
-                result.append(".exe, excel formula and, url aren't found")
+                if not hidden_data:
+                    hidden_data.append('Hidden data not found')
 
-            # missing data report 
-            df = pd.read_excel(file)
-            missing_data = df.isnull().sum()
-            incomplete_data = str(missing_data).split('\n')
+                dic_result = {'data': hidden_data}
+                return render(request, 'extract_data.html', dic_result)
 
-            #vba_parser = VBA_Parser(file.name)
-            #vba_modules = file.extract_all_macros(file)
-
+            elif str(data) == 'missing':
+                # missing data report 
+                df = pd.read_excel(file)
+                missing_data = df.isnull().sum()
+                incomplete_data = str(missing_data).split('\n')
+                dic_result = {'data': incomplete_data}           
+                return render(request, 'extract_data.html', dic_result)
             
-            filedata = open(file.name, 'rb').read()
-            vbaparser = VBA_Parser(file.name, data=filedata)
+            elif str(data) == "macro":
+                filedata = open(file.name, 'rb').read()
+                vbaparser = VBA_Parser(file.name, data=filedata)
 
-            for (filename, stream_path, vba_filename, vba_code) in vbaparser.extract_macros(): 
-                extract_macro.append(str(vba_code))
+                for (filename, stream_path, vba_filename, vba_code) in vbaparser.extract_macros(): 
+                    extract_macro.append(str(vba_code))
+                
+                if not extract_macro:
+                    extract_macro.append("No macro found")
+
+                dic_result = {'data': extract_macro}
+                return render(request, 'extract_data.html', dic_result)
+
+            # check .exe, url, missing data,
+            elif str(data) == "url":
+                for row in xls.iter_rows(min_row=1, max_col=xls.max_column, max_row=xls.max_row):
+                    count = count + 1
+                    for column_value in row:
+                        null_data_check = column_value.value
+
+                        if re.findall('http[s]?://(?:[a-zA-Z]|[0-9]|[$-_@.&+]|[!*\(\),]|(?:%[0-9a-fA-F][0-9a-fA-F]))+', str(null_data_check)):
+                            result.append(str(null_data_check))
+
+                if not result:
+                    result.append("Url data aren't found")
+                dic_result = {'data': result}
+            
+                return render(request, 'extract_data.html', dic_result)
+
+            elif str(data) == ".exe":
+                for row in xls.iter_rows(min_row=1, max_col=xls.max_column, max_row=xls.max_row):
+                    count = count + 1
+                    for column_value in row:
+                        null_data_check = column_value.value
+                        if re.findall(r'\b\S*\.exe\b', str(null_data_check)):
+                            result.append(str(null_data_check))
+                
+                if not result:
+                    result.append(".exe data aren't found")
+                dic_result = {'data': result}
+            
+                return render(request, 'extract_data.html', dic_result)
+
+            elif isinstance(float(data), float):
+                for row in xls.iter_rows(min_row=1, max_col=xls.max_column, max_row=xls.max_row):
+                    count = count + 1
+                    for column_value in row:
+                        data_check = column_value.value
+                        if str(data) == str(data_check):
+                            number.append(data_check)
+                dic_result = {'data': number}
+            
+                return render(request, 'extract_data.html', dic_result)
 
 
-            if not extract_macro:
-                extract_macro.append("No macro found")
-    
-        dic_result = {'data': incomplete_data, 'hidden': hidden_data, 'result': result, 'macro': extract_macro}
-        return render(request, 'extract_data.html', dic_result)
+        dic_result = {'data': input_wrong}
+            
+        return render(request, 'extract.html', dic_result)
+                
+                
     return render(request, 'extract.html')
