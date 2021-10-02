@@ -1,0 +1,7 @@
+1) pattern check 
+2) incomplete -> misssing 
+3) invaild data check 
+4) Range of number check
+
+
+5) increase size of text
