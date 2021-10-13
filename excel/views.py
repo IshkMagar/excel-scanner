@@ -19,6 +19,7 @@ from matplotlib import pyplot as plt
 import urllib, base64
 import io
 import pandas as pd
+from datetime import datetime
 
 
 filename = ""
@@ -137,6 +138,21 @@ def upload(request):
         return render(request, 'report.html', dic_result)
     return render(request, 'upload.html')
 
+def validate_date(time):
+    try:
+        datetime.strptime(time, '%I:%M:%S %p')
+        return True
+    except ValueError:
+        return False
+
+def validate_numbers(num):
+    try:
+        float(num)
+        return True
+    except ValueError:
+        return False
+
+
 @allowed_users(allowed_roles=["administrator", "New user"])
 def extract(request):
     result = []
@@ -144,6 +160,8 @@ def extract(request):
     incomplete_data = []
     extract_macro = []
     number = []
+    invalid_data = []
+    Range = []
     input_wrong = ["check out your input data and follow the how to input section"]
     
     if request.method == 'POST':
@@ -151,7 +169,6 @@ def extract(request):
             file = request.FILES['document']
             data = request.POST.get('data')
             
-            print(request.POST.get('data'))
             workbook = load_workbook(filename=file, data_only=True)
             xls = workbook[workbook.sheetnames[0]] 
 
@@ -159,8 +176,6 @@ def extract(request):
 
             count = 0
             
-            
-
             if data == 'hidden':
                 # check hidden rows
                 for rowLetter,rowDimension in xls.row_dimensions.items():
@@ -174,12 +189,16 @@ def extract(request):
                 return render(request, 'extract_data.html', dic_result)
 
             elif str(data) == 'missing':
-                # missing data report 
-                df = pd.read_excel(file)
+                # missing data report
+                df = pd.read_excel(file, header=None)
                 missing_data = df.isnull().sum()
-                incomplete_data = str(missing_data).split('\n')
+                new_line_data_split = str(missing_data).split('\n')
+                
+                for i in new_line_data_split:
+                    incomplete_data.append(tuple(str(i).split()))
+
                 dic_result = {'data': incomplete_data}           
-                return render(request, 'extract_data.html', dic_result)
+                return render(request, 'missing.html', dic_result)
             
             elif str(data) == "macro":
                 filedata = open(file.name, 'rb').read()
@@ -223,7 +242,38 @@ def extract(request):
                 dic_result = {'data': result}
             
                 return render(request, 'extract_data.html', dic_result)
+            
+            elif str(data) == 'invalid':
+                df = pd.read_excel(file, header=None)
+                for x, y in df.iteritems():
+                    if count == 0:
+                        for i,t in y.iteritems():
+                            if validate_date(str(t).strip()) == False:
+                                invalid_data.append((i+1, count + 1, df.iat[i, 0], str(t)))
+                    else:
+                        for i,t in y.iteritems():
+                            if validate_numbers(str(t)) == False:
+                                invalid_data.append((i+1, count + 1, df.iat[i, 0], str(t)))
+                    count = count + 1 
+                dic_result = {'data': invalid_data}
 
+                return render(request, 'invalid.html', dic_result)
+ 
+            elif str(data) == 'range':
+                df = pd.read_excel(file, header=None)
+                for x, y in df.iteritems():
+                    if count == 0:
+                        for i in y:
+                            break 
+                    elif count == 2:
+                        for i,t in y.iteritems():
+                            if validate_numbers(str(t)) == True:
+                                if float(str(t)) > 2000.00:
+                                    Range.append((i+1, count + 1, df.iat[i, 0], t))
+                    count = count + 1    
+                dic_result = {'data': Range}
+
+                return render(request, 'invalid.html', dic_result)
             elif isinstance(float(data), float):
                 for row in xls.iter_rows(min_row=1, max_col=xls.max_column, max_row=xls.max_row):
                     count = count + 1

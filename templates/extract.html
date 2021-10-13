@@ -49,6 +49,10 @@
                 transition: all .2s ease;
                 cursor: pointer;
             }
+
+            .input li{
+              font-size: 20px;
+            }
             </style>
       </head>
 <body style="background-color: #06557d;">
@@ -88,12 +92,14 @@
       {% load static %}
       <h1> How to input specific data in the input section</h1>
       <p> Below here, I am going to show how to input data: </p>
-      <ol>
+      <ol class="input">
         <li>Enter "url" to get all url links</li>
         <li>Enter ".exe" to get all .exe data</li>
         <li>Enter "macro" to get vba code</li>
         <li>Enter "hidden" to get all hidden rows</li>
         <li>Enter "missing" to get missing data statistic result</li>
+        <li>Enter "invalid" to get invalid data ( misplaced data, wrong data and, wrong format data</li>
+        <li>Enter "range" to get data higher than 2000.00 from column 3</li>
         <li>Enter specific data to get all the data from the file</li>
       </ol>
       <br><br>

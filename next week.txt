@@ -1,7 +1,8 @@
 1) pattern check 
-2) incomplete -> misssing 
-3) invaild data check 
-4) Range of number check
+2) incomplete or missing --> complete
+3) invalid data check --> complete
+4) Range of number check --> complete
 
 
-5) increase size of text
+5) increase size of text --> complete
+6) misplaced data --> progress
