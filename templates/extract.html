@@ -26,23 +26,7 @@
                 text-transform: uppercase;
                 font-weight: 700;
             }
-            .file-upload-btn {
-                display: block;
-                width: 25%;
-                margin: auto;
-                color: #fff;
-                background: #1f81b2;
-                border: none;
-                padding: 10px;
-                border-radius: 4px;
-                border-bottom: 4px solid #06557d;
-                text-transform: uppercase;
-                font-weight: 700;
-            }
-            .file-upload-btn:active {
-                border: 0;
-                transition: all .2s ease;
-            }
+            
             .file-upload-btn:hover {
                 background: #06557d;
                 color: #ffffff;
@@ -50,13 +34,17 @@
                 cursor: pointer;
             }
 
-            ol {
-              display: table;
-              margin: 0 auto;
+            .test, form, table, th, td{
+              border-collapse: collapse;
+              background-color:skyblue;
+              border: 1px solid black;
             }
-            .input li{
-              font-size: 20px;
-            }
+            th, td {
+            padding-top: 10px;
+            padding-bottom: 20px;
+            padding-left: 30px;
+            padding-right: 40px;
+          }
             </style>
       </head>
 <body style="background-color: #06557d;">
@@ -78,7 +66,7 @@
               
               <ul class="navbar-nav ms-auto">
                 <li class="nav-item">
-                  <a class="nav-link" href="{% url 'upload' %}"> Report </a>
+                  <a class="nav-link" href="{% url 'upload' %}"> Detect </a>
                 </li>
                 <li class="nav-item">
                   <a class="nav-link" href="{% url 'extract' %}"> Extract data </a>
@@ -92,27 +80,36 @@
     </nav>
 </div>
 
-<h1 style="text-align: center;"> How to input specific data in the input section</h1>
-
-      <ol class="input">
-        <li>Enter "url" to get all url links</li>
-        <li>Enter ".exe" to get all .exe data</li>
-        <li>Enter "macro" to get vba code</li>
-        <li>Enter "hidden" to get all hidden rows</li>
-        <li>Enter "missing" to get missing data statistic result</li>
-        <li>Enter "invalid" to get invalid data (misplaced data, wrong data and, wrong format data)</li>
-        <li>Enter "range" to get data higher than 2000.00 from column 3</li>
-        <li>Enter specific data to get all the data from the file</li>
-      </ol>
-      <br><br>
-
-  <div class="w3-container w3-center">
+  <div class="w3-container w3-center test">
         <form method="post" enctype="multipart/form-data">
           {% csrf_token %}
-          <label style="font-size: 20px;" for="your_name"> Specific Data </label>
-          <input type="text" name="data" placeholder="Please enter a data"> <br>
           <input type="file" name="document" class="file-upload">
-          <button type="submit" class="file-upload-btn">Upload</button>
+
+          <table class="table" style="width:100%">
+            <tr>
+              <td> <button type="submit" name="hidden" class="file-upload-btn btn btn-primary">hidden rows</button> </td>
+              <td> <button type="submit" name="missing" class="file-upload-btn btn btn-primary">missing</button> </td>
+              <td> <button type="submit" name="invalid" class="file-upload-btn btn btn-primary">invalid</button> </td>
+            </tr>
+              
+            <tr>
+              <td> <button type="submit" name="url" class="file-upload-btn btn btn-primary">url</button> </td>
+              <td><button type="submit" name="exe" class="file-upload-btn btn btn-primary">.exe</button> </td>
+              <td><button type="submit" name="macro" class="file-upload-btn btn btn-primary">macro</button> </td>
+            </tr>
+
+            <tr>
+              <td> 
+                <button type="submit" name="range" class="file-upload-btn btn btn-primary"> range </button> 
+                <br> 
+                <input type="number" name="data" placeholder="Please, enter a range number"> </td>
+              <td> <p style="font-size: 40px;"> --- </p> </td>
+              <td> 
+                <button type="submit" name="specific" class="file-upload-btn btn btn-primary"> specific </button> 
+                <br> 
+                <input type="text" name="specific_num" placeholder="Please, enter a value"> </td>
+            </tr>
+          </table>
         </form>
   </div>
 </body>

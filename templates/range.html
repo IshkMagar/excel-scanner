@@ -2,7 +2,7 @@
 <!DOCTYPE html>
 <html>
     <head>
-        <title>Extracted</title>
+        <title>Range</title>
         <meta name="viewport" content="width=device-width, initial-scale=1">
         <link rel="stylesheet" href="https://www.w3schools.com/w3css/4/w3.css">
         <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/4.7.0/css/font-awesome.min.css">
@@ -17,6 +17,31 @@
             border: 3px solid #737373;
             padding: 10px;
           }
+
+        table {
+            border-collapse: collapse;
+            border-spacing: 0;
+            background-color: aliceblue;
+            width: 100%;
+            border: 1px solid #ddd;
+        }
+
+        .buttons {
+        background-color: #f4511e;
+        border: none;
+        color: white;
+        padding: 16px 32px;
+        text-align: center;
+        font-size: 16px;
+        margin: 4px 2px;
+        opacity: 0.6;
+        transition: 0.3s;
+        display: inline-block;
+        text-decoration: none;
+        cursor: pointer;
+      }
+
+      .buttons:hover {opacity: 1}
         </style>
   </head>
 <body style="background: #06557d;">
@@ -55,28 +80,32 @@
   <h1 style="text-align: center"> Data report </h1>
   
   <div class="center">
-    <h1> Extract Data </h1>
-    <button onclick="ExportToExcel('xlsx')">Export table to excel</button>
+    <h1> Extracted Range Data </h1>
+    <button class="buttons" onclick="ExportToExcel('xlsx')">Export table to excel</button>
 
     <table class="table" id="tblStocks">
-      <thead>
+        <thead>
+            
+            <th scope="col"> Row Number </th>
+            <th scope="col"> Column Number</th>
+            <th scope="col"> Time </th>
+            <th scope="col"> Number Higer than Range </th>
+            
+        </thead>
+        <tbody>{% for info in data %}  
+            <tr>
+                <td> {{info.0}} </td>   
+                <td> {{info.1}} </td>  
+                <td> {{info.2}} </td> 
+                <td> {{info.3}} </td>
+            </tr>
+          {% endfor %} 
 
-          <th scope="col"> Data </th>
-
-      </thead>
-
-      <tbody>{% for info in data %}  
-
-          <tr>
-            <td> {{info}} </td>
-          </tr>
-
-        {% endfor %} 
-      </tbody>
+        </tbody>
     </table>
+    
 
   </div>
- 
   <script>
 
     function ExportToExcel(type, fn, dl) {
@@ -84,7 +113,7 @@
         var wb = XLSX.utils.table_to_book(elt, { sheet: "sheet1" });
         return dl ?
             XLSX.write(wb, { bookType: type, bookSST: true, type: 'base64' }) :
-            XLSX.writeFile(wb, fn || ('Report_result.' + (type || 'xlsx')));
+            XLSX.writeFile(wb, fn || ('Range_result.' + (type || 'xlsx')));
     }
 
 </script>

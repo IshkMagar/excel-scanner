@@ -167,29 +167,13 @@ def extract(request):
     if request.method == 'POST':
         if request.FILES.get('document'):
             file = request.FILES['document']
-            data = request.POST.get('data')
-            
+
             workbook = load_workbook(filename=file, data_only=True)
             xls = workbook[workbook.sheetnames[0]] 
-
-            # macros check
-
             count = 0
-            
-            if data == 'hidden':
-                # check hidden rows
-                for rowLetter,rowDimension in xls.row_dimensions.items():
-                    if rowDimension.hidden == True:
-                        hidden_data.append(rowDimension)
+            total_count = 0
 
-                if not hidden_data:
-                    hidden_data.append('Hidden data not found')
-
-                dic_result = {'data': hidden_data}
-                return render(request, 'extract_data.html', dic_result)
-
-            elif str(data) == 'missing':
-                # missing data report
+            if 'missing' in request.POST:
                 df = pd.read_excel(file, header=None)
                 missing_data = df.isnull().sum()
                 new_line_data_split = str(missing_data).split('\n')
@@ -199,8 +183,26 @@ def extract(request):
 
                 dic_result = {'data': incomplete_data}           
                 return render(request, 'missing.html', dic_result)
+
+            elif 'range' in request.POST:
+                df = pd.read_excel(file, header=None)
+                for x, y in df.iteritems():
+                    if count == 0:
+                        for i in y:
+                            break 
+                    elif count == 2:
+                        for i,t in y.iteritems():
+                            if validate_numbers(str(t)) == True:
+                                total_count = total_count + 1
+                                if float(str(t)) > float(request.POST.get("data")):
+                                    Range.append((i+1, count + 1, df.iat[i, 0], t))
+                    count = count + 1
+                Range.append(("Total", ' ', ' ', len(Range)))  
+                dic_result = {'data': Range}
+
+                return render(request, 'range.html', dic_result)
             
-            elif str(data) == "macro":
+            elif 'macro' in request.POST:
                 filedata = open(file.name, 'rb').read()
                 vbaparser = VBA_Parser(file.name, data=filedata)
 
@@ -212,9 +214,9 @@ def extract(request):
 
                 dic_result = {'data': extract_macro}
                 return render(request, 'extract_data.html', dic_result)
-
+            
             # check .exe, url, missing data,
-            elif str(data) == "url":
+            elif 'url' in request.POST:
                 for row in xls.iter_rows(min_row=1, max_col=xls.max_column, max_row=xls.max_row):
                     count = count + 1
                     for column_value in row:
@@ -229,7 +231,7 @@ def extract(request):
             
                 return render(request, 'extract_data.html', dic_result)
 
-            elif str(data) == ".exe":
+            elif 'exe' in request.POST:
                 for row in xls.iter_rows(min_row=1, max_col=xls.max_column, max_row=xls.max_row):
                     count = count + 1
                     for column_value in row:
@@ -243,7 +245,7 @@ def extract(request):
             
                 return render(request, 'extract_data.html', dic_result)
             
-            elif str(data) == 'invalid':
+            elif 'invalid' in request.POST:
                 df = pd.read_excel(file, header=None)
                 for x, y in df.iteritems():
                     if count == 0:
@@ -255,40 +257,26 @@ def extract(request):
                             if validate_numbers(str(t)) == False:
                                 invalid_data.append((i+1, count + 1, df.iat[i, 0], str(t)))
                     count = count + 1 
+                invalid_data.append(("Total", ' ', ' ', len(invalid_data)))
                 dic_result = {'data': invalid_data}
 
                 return render(request, 'invalid.html', dic_result)
- 
-            elif str(data) == 'range':
-                df = pd.read_excel(file, header=None)
-                for x, y in df.iteritems():
-                    if count == 0:
-                        for i in y:
-                            break 
-                    elif count == 2:
-                        for i,t in y.iteritems():
-                            if validate_numbers(str(t)) == True:
-                                if float(str(t)) > 2000.00:
-                                    Range.append((i+1, count + 1, df.iat[i, 0], t))
-                    count = count + 1    
-                dic_result = {'data': Range}
+            
+            elif 'specific' in request.POST:
+                if isinstance(float(request.POST.get("specific_num")), float):
+                    for row in xls.iter_rows(min_row=1, max_col=xls.max_column, max_row=xls.max_row):
+                        count = count + 1
+                        for column_value in row:
+                            data_check = column_value.value
+                            if str(request.POST.get("specific_num")) == str(data_check):
+                                number.append(data_check)
 
-                return render(request, 'invalid.html', dic_result)
-            elif isinstance(float(data), float):
-                for row in xls.iter_rows(min_row=1, max_col=xls.max_column, max_row=xls.max_row):
-                    count = count + 1
-                    for column_value in row:
-                        data_check = column_value.value
-                        if str(data) == str(data_check):
-                            number.append(data_check)
                 dic_result = {'data': number}
             
                 return render(request, 'extract_data.html', dic_result)
-
-
         dic_result = {'data': input_wrong}
             
         return render(request, 'extract.html', dic_result)
-                
+          
                 
     return render(request, 'extract.html')
